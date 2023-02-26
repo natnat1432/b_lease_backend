@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, session, abort, jsonify
 from flask_mysqldb import MySQL
+from flask_restful import Api,Resource
 import db
+import restapi
 
 
 
@@ -10,6 +12,17 @@ import db
 
 app = Flask(__name__)
 app.secret_key = "b-lease2022"
+
+#Api setup
+#-----------------------------------------------------
+
+
+api = Api(app)
+api.add_resource(restapi.user,"/user")
+# api.add_resource(restapi.signup,"/signup/<string:id>")
+
+
+#-----------------------------------------------------
 
 #Database Connection Setup 
 #-----------------------------------------------------
@@ -23,39 +36,14 @@ mysql = MySQL(app)
 #-----------------------------------------------------
 
 
-   
+
+
+
 
 
 
     
-@app.route("/")
-def index():
-    fields = [
-        'adminID',
-        'admin_fname',
-        'admin_mname',
-        'admin_lname',
-        'admin_username',
-        'admin_password_hashed',
-        'admin_password',
-    ]
 
-    data = [
-        'asdasd',
-        'nathaniel',
-        'Cabual',
-        'Tiempo',
-        'sdasjhkhkda',
-        '1234567890',
-        '1234567890'
-
-    ]
-
-    insert = db.insert_data('admin', fields, data)
-    if insert:
-        return "Success"
-    else:
-        return "Fail"
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
