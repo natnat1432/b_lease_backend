@@ -2,9 +2,6 @@ from flask_mysqldb import MySQL
 from app import mysql
 
 
-
-
-
 def get_data(table:str, field:str, value:str)->dict:
     cur = mysql.connection.cursor() 
     cur.execute(f"SELECT * FROM {table} WHERE `{field}` = '{value}' ")

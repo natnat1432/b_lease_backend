@@ -2,12 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, a
 from flask_mysqldb import MySQL
 import db
 
-
-
-
-
-
-
 app = Flask(__name__)
 app.secret_key = "b-lease2022"
 
@@ -16,17 +10,11 @@ app.secret_key = "b-lease2022"
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_PORT'] = 3308
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = '@farmleaseoperationsmanagement2022'
+app.config['MYSQL_PASSWORD'] = 'allain19851047!'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['MYSQL_DB'] = 'b_lease'
 mysql = MySQL(app)
 #-----------------------------------------------------
-
-
-   
-
-
-
     
 @app.route("/")
 def index():
@@ -58,4 +46,4 @@ def index():
         return "Fail"
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+    app.run(debug=True)
