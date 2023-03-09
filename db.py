@@ -10,6 +10,15 @@ def get_data(table:str, field:str, value:str)->dict:
     cur.close()
     return data
 
+def get_items(table:str, field:str, value:str)->dict:
+    cur = mysql.connection.cursor() 
+    print(f'SELECT * FROM {table} WHERE `{field}` = "{value}" ')
+    cur.execute(f'SELECT * FROM {table} WHERE `{field}` = "{value}" ')
+    data:dict = cur.fetchall()
+    mysql.connection.commit()
+    cur.close()
+    return data
+
 def check_existing_data(table:str, field:str, value:str)->bool:
     cur = mysql.connection.cursor()
     cur.execute(f'''SELECT EXISTS(SELECT * FROM `{table}` WHERE `{field}` = "{value}") AS check_existing''')
@@ -99,4 +108,32 @@ def get_specific_data(table:str, fields, values):
         mysql.connection.commit()
         cur.close()
         return data
+
+#not a database abstraction
+#only used temporarily for getting the conversations per inquired property
+def join_tables(userID:str):
+    cur = mysql.connection.cursor() 
+    cur.execute(f'''
+        SELECT L.LEASINGID, U.USERID, U.USER_FNAME, P.ADDRESS, M.MSG_CONTENT
+        FROM USER U, PROPERTY P, LEASING L
+        JOIN (
+        SELECT leasingID, MAX(sent_at) AS latest_sent_at
+        FROM message
+        GROUP BY leasingID
+        ) latest_msg
+        ON l.leasingID = latest_msg.leasingID
+        JOIN message m
+        ON m.leasingID = l.leasingID AND m.sent_at = latest_msg.latest_sent_at
+        WHERE U.USERID = L.LESSORID
+        AND P.PROPERTYID = L.PROPERTYID
+    ''')
+    data:dict = cur.fetchall()
+    mysql.connection.commit()
+    cur.close()
+    return data
+
+
+
+
+
 
