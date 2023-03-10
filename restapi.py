@@ -1,4 +1,5 @@
 
+from http.client import HTTPResponse
 from flask_restful import Api, Resource, reqparse
 from flask import request, abort, jsonify
 import db
@@ -8,6 +9,7 @@ from util import generateUUID, hashMD5, JSONEncoder, generate_otp
 from emailverification import email_verification
 from apscheduler.schedulers.background import BlockingScheduler
 from flask_cors import CORS
+
 \
 # signup_put_args = reqparse.RequestParser()
 # signup_put_args.add_argument("contact_number", type=str, help="Phone number of the user")
@@ -106,9 +108,12 @@ class user(Resource):
             userJson = json.dumps(userInfo, indent=2, cls=JSONEncoder)
             return userJson, 200
         else:
-            if userInfo is not None:
+            if userID is not None:
+                userInfo = db.get_data('user','userID',userID)
                 userJson = json.dumps(userInfo,default=str)
-                return userJson, 200
+          
+                return jsonify(userJson)
+               
             else:
                 return abort(400,'User not found')
     
@@ -251,6 +256,7 @@ class login(Resource):
 
                 return {'message':'Login',
                         'sessionID':sessionID,
+                        'userID':check_credential['userID']
                         },200
             else:
                 return abort(404, 'Error creating session')
