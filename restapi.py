@@ -27,8 +27,11 @@ import json
 #         args = signup_put_args.parse_args()
 #         return { id:args}
 
+#=======================================================================================
+#RESOURCE CLASSES FOR API
+#=======================================================================================
 
-
+#=======================================================================================
 #REGISTER API CLASS
 #=======================================================================================
 register_args = reqparse.RequestParser()
@@ -86,6 +89,7 @@ class register(Resource):
               return abort(404,"OTP not found")  
         else:
             return abort(404,"OTP not found")
+        
 #=======================================================================================
 
 #USER API CLASS
@@ -105,41 +109,6 @@ user_args.add_argument('longitude', type=str,help='Missing Google maps longitutd
 user_args_put = reqparse.RequestParser()
 user_args_put.add_argument('userID', type=str, help='Missing User ID', required=True)
 
-#TO BE MOVED!!!!
-
-#for leasing
-leasing_args_post = reqparse.RequestParser()
-leasing_addargs_post= reqparse.RequestParser()
-#
-# leasing_addargs_post.add_argument('security_deposit', type=str, help='Missing Lessor ID', required=True)
-# leasing_addargs_post.add_argument('improvements', type=str, help='Missing Lessee ID', required=True)
-# leasing_addargs_post.add_argument('erect_signage', type=str, help='Missing Lessee ID', required=True)
-
-# leasing_args_post.add_argument('lessorID', type=str, help='Missing Lessor ID', required=True)
-# leasing_args_post.add_argument('lesseeID', type=str, help='Missing Lessee ID', required=True)
-# leasing_args_post.add_argument('propertyID', type=str, help='Missing Property ID', required=True)
-
-leasing_args_post.add_argument('leasing_status', type=str, help='Missing Leasing Status', required=True)
-leasing_args_post.add_argument('leasing_start', type=str, help='Missing Leasing Start', required=True)
-leasing_args_post.add_argument('leasing_end', type=str, help='Missing Leasing End', required=True)
-leasing_args_post.add_argument('leasing_payment_frequency', type=str, help='Missing Payment Frequency', required=True)
-leasing_args_post.add_argument('leasing_total_fee', type=str, help='Missing Total Fee', required=True)
-
-# leasing_args_post.add_argument('leasing_remarks', type=str, help='Missing Leasing Remarks', required=False)
-leasing_docs = reqparse.RequestParser()
-leasing_docs.add_argument('leasingID', type=str, help='Missing Leasing ID', required=True)
-
-#for messages
-message_post = reqparse.RequestParser()
-message_post.add_argument('msg_senderID', type=str, help='Missing Sender ID', required=True)
-message_post.add_argument('msg_receiverID', type=str, help='Missing Receiver ID', required=True)
-message_post.add_argument('msg_content', type=str, help='Missing Message Content', required=False)
-message_post.add_argument('sent_at', type=str, help='Missing Time of Sending',required=True)
-
-#for message images
-
-#USER API CLASS
-#=======================================================================================
 class user(Resource):
     def get(self):
         userID = request.args.get('userID')
@@ -237,6 +206,33 @@ class user(Resource):
         else:
             return {'message':f'User with userID: {userJson["userID"]} does not exist'},400
         
+#=======================================================================================
+
+#LEASING API CLASS
+#=======================================================================================
+#for leasing
+leasing_args_post = reqparse.RequestParser()
+leasing_addargs_post= reqparse.RequestParser()
+# leasing_addargs_post.add_argument('security_deposit', type=str, help='Missing Lessor ID', required=True)
+# leasing_addargs_post.add_argument('improvements', type=str, help='Missing Lessee ID', required=True)
+# leasing_addargs_post.add_argument('erect_signage', type=str, help='Missing Lessee ID', required=True)
+
+# leasing_args_post.add_argument('lessorID', type=str, help='Missing Lessor ID', required=True)
+# leasing_args_post.add_argument('lesseeID', type=str, help='Missing Lessee ID', required=True)
+# leasing_args_post.add_argument('propertyID', type=str, help='Missing Property ID', required=True)
+
+#for updating
+leasing_args_post.add_argument('leasingID', type=str, help='Missing LeasingID', required=True)
+#the details that would be updated
+leasing_args_post.add_argument('leasing_status', type=str, help='Missing Leasing Status', required=True)
+leasing_args_post.add_argument('leasing_start', type=str, help='Missing Leasing Start', required=True)
+leasing_args_post.add_argument('leasing_end', type=str, help='Missing Leasing End', required=True)
+leasing_args_post.add_argument('leasing_payment_frequency', type=str, help='Missing Payment Frequency', required=True)
+leasing_args_post.add_argument('leasing_total_fee', type=str, help='Missing Total Fee', required=True)
+
+# leasing_args_post.add_argument('leasing_remarks', type=str, help='Missing Leasing Remarks', required=False)
+
+
 
 class Leasing(Resource):
     def get(self):
@@ -262,20 +258,19 @@ class Leasing(Resource):
     #         return abort(400,'User not found')
 
     def post(self):
-        leasingInfo = leasing_args_post.parse_args()
-        #leasingInfo = request.get_json(force=True)
+        lessorID = str(request.json['lessorID'])
+        lesseeID = str(request.json['lesseeID'])
+        propertyID = str(request.json['propertyID'])
+        leasing_status = str(request.json['leasing_status'])
         
-        param = str(leasingInfo['leasing_status']+leasingInfo['leasing_start']+leasingInfo['leasing_end']+leasingInfo['leasing_payment_frequency']+leasingInfo['leasing_total_fee'])
+        param = str(lessorID + lesseeID + propertyID + leasing_status + str(datetime.now()))
         leasingID = util.generateUUID(param)
         
-        fields = ['leasingID','lessorID','lesseeID','propertyID']
-        data = [leasingID,'1232','1231','1234']  
+        fields = ['leasingID','lessorID','lesseeID','propertyID','leasing_status']
+        data = [leasingID, lessorID, lesseeID, propertyID, leasing_status]  
 
-        for k,v in leasingInfo.items():
-            fields.append(k)
-            data.append(v)
 
-        check_existing = db.check_existing_data('leasing', 'leasingID', fields[0])
+        check_existing = db.check_existing_data('leasing', 'leasingID', data[0])
         if check_existing:
             return {'message':f'User with userID: {leasingID} already exist'},409
         
@@ -283,21 +278,47 @@ class Leasing(Resource):
             insert_data_bool = db.insert_data('leasing',fields,data)
             
             if insert_data_bool:
-
                 #after inserting important leasing data, render the pdf(contract) and 
                 # save the contract details to leasing_documents
-
-                leasing_docID = util.createPDF(leasingID)
-                leasing_doc_name = str(leasing_docID + "_contract.pdf") 
-                insert_docs = db.insert_data('leasing_documents',['leasing_docID','leasingID','leasing_doc_name'],[leasing_docID,leasingID,leasing_doc_name])
-                
-                if insert_docs:
-                    return {'message':'Successfully requested to lease'}, 201
+                return {'message':'Successfully initiated lease request',
+                        'leasingID':leasingID
+                    }, 201
 
             else:
                 return {'message':'Unable to lease request'},400
             
+    def put(self):
+        leasingInfo = leasing_args_post.parse_args()
+
+        fields = []
+        data = []  
+
+        for k,v in leasingInfo.items():
+            fields.append(k)
+            data.append(v)
+
+        check_existing = db.check_existing_data('leasing', 'leasingID', data[0])
         
+        if check_existing:
+            update_data_bool = db.update_data('leasing',fields,data)
+            
+            if update_data_bool:
+                #after inserting important leasing data, render the pdf(contract) and 
+                # save the contract details to leasing_documents
+                leasingID = leasingInfo['leasingID']
+                leasing_docID = util.createPDF(leasingID)
+                leasing_doc_name = str(leasing_docID + "_contract.pdf") 
+                insert_docs = db.insert_data('leasing_documents',['leasing_docID','leasingID','leasing_doc_name'],[leasing_docID,leasingID,leasing_doc_name])
+                if insert_docs:
+                    return {'message':'Successfully confirmed lease request'}, 204
+
+            else:
+                return {'message':'Unable to lease request'},400
+        
+        else:
+            return abort(400,'Leasing info not found')
+            
+
     def delete(self):
         leasingID = request.args.get('leasingID')
 
@@ -314,46 +335,69 @@ class Leasing(Resource):
                 }, 400
         else:
             return abort(400,'Cannot delete. Contract not found')
-        
-    
+
+#=======================================================================================
+
+#LEASING DOCUMENTS API CLASS
+#=======================================================================================
+leasing_docs = reqparse.RequestParser()
+leasing_docs.add_argument('leasingID', type=str, help='Missing Leasing ID', required=True)
+
 class Leasing_Documents(Resource):
     def get(self):
-        #leasingID = request.args.get('leasingID')
-        leasingID= '30de93a0c7013ed3bc403092b8d709bf'
+        leasingID = request.args.get('leasingID')
         leasingDocs = db.get_data('leasing_documents', 'leasingID', leasingID)
         
         if leasingDocs is not None:
             file_path = f"static\{leasingID}\{leasingDocs['leasing_doc_name']}"
-            return send_file(file_path, attachment_filename=os.path.basename(file_path), as_attachment=False)
+            return send_file(file_path)
         else:
             return abort(400,'Contract not found')
     
     def delete(self):
         return None
     
+#=======================================================================================
+
+#MESSAGE API CLASS
+#=======================================================================================
+#for messages
+message_post = reqparse.RequestParser()
+message_post.add_argument('msg_senderID', type=str, help='Missing Sender ID', required=True)
+message_post.add_argument('msg_receiverID', type=str, help='Missing Receiver ID', required=True)
+message_post.add_argument('msg_content', type=str, help='Missing Message Content', required=False)
+
 class Message(Resource):
     def get(self):
-        leasingID = 'fasdfsdfdsfds'
-        messages = db.get_items('message','leasingID', leasingID)
+        leasingID = request.args.get('leasingID')
+        messages = db.get_items_in_order('message','leasingID', leasingID, 'sent_at', 'asc')
         if messages is not None:
             messages_encoded = json.dumps(messages,default=str)
             return messages_encoded, 200
         else:
             return abort(400,'No conversations found')
-        
 
 
     def post(self):
-        messageInfo = message_post.parse_args()
-        
+        leasingID = request.json['leasingID']
+        msg_senderID = request.json['msg_senderID'] 
+        msg_receiverID = request.json['msg_receiverID']
+        msg_content = request.json['msg_content']
+        sent_at = request.json['sent_at']
+
+        print(msg_receiverID)
+        param = str(msg_content + msg_senderID + msg_receiverID + sent_at)
+        msgID = util.generateUUID(param)
+
         fields = ['msgID','leasingID','msg_senderID','msg_receiverID','msg_content','sent_at']
-        msgID = util.generateUUID(json.dumps(messageInfo))
-
-        #values = [msgID, ]
-
-        message = db.insert_data('messages',[''])
-        app.socketio.emit('new-message', message.content, broadcast=True)
-        return jsonify({'success': True})
+        data = [msgID,leasingID,msg_senderID,msg_receiverID,msg_content,sent_at]  
+        #insert message here
+        test = db.insert_data('message', fields, data)
+        #test = True
+        if test:
+            return {'message':'Message sent'}, 201
+        else:
+            return abort(400,'Could not post message')
     
 
 class Message_Images(Resource):
@@ -361,8 +405,11 @@ class Message_Images(Resource):
         return None
     def post(self):
         return None
+    
 #=======================================================================================
-#  LOGIN API CLASS | C 
+
+#LOGIN API CLASS
+#=======================================================================================
 login_args = reqparse.RequestParser()
 login_args.add_argument('user_email', type=str, help='Missing Email', required=True)
 login_args.add_argument('user_password', type=str, help='Missing Password', required=True)
@@ -416,6 +463,7 @@ class login(Resource):
 
                 return {'message':'Login',
                         'sessionID':sessionID,
+                        'userID':check_credential['userID']
                         },200
             else:
                 return abort(404, 'Error creating session')
@@ -429,9 +477,11 @@ class login(Resource):
         #         return {'message':'Success user creation'},201
         #     else:
         #         return {'message':'Error user creation'},400
+
 #=======================================================================================
 
 # SESSION API CLASS | CRU
+#=======================================================================================
 session_args = reqparse.RequestParser()
 session_args.add_argument('sessionID', type=str, help='Missing Session ID', required=True)
 session_args.add_argument('userID', type=str, help='Missing User ID', required=True)
