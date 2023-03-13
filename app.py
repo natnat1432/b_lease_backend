@@ -25,6 +25,7 @@ api = Api(app)
 #----------------------------------------------------
 
 api.add_resource(restapi.user,"/user")
+api.add_resource(restapi.changepassword,"/changepassword")
 api.add_resource(restapi.session,"/session")
 api.add_resource(restapi.complaint,"/complaint")
 api.add_resource(restapi.user_payment_method,"/user_payment_method")
@@ -33,6 +34,9 @@ api.add_resource(restapi.login,"/login")
 
 api.add_resource(restapi.Leasing,"/leasing")
 api.add_resource(restapi.Leasing_Documents,"/leasingdocs")
+api.add_resource(restapi.property,"/property")
+api.add_resource(restapi.propertyimages,"/propertyimages/<string:propertyID>/<string:image>")
+
 
 api.add_resource(restapi.Message,"/message")
 #-----------------------------------------------------
@@ -42,11 +46,12 @@ api.add_resource(restapi.Message,"/message")
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_PORT'] = 3308
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'allain19851047!'
+app.config['MYSQL_PASSWORD'] = '@farmleaseoperationsmanagement2022'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config['MYSQL_DB'] = 'b_lease'
 mysql = MySQL(app)
 #-----------------------------------------------------
+
 
 
 
