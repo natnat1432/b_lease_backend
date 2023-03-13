@@ -2,6 +2,14 @@ from flask_mysqldb import MySQL
 from app import mysql
 
 
+def get_all_data(table:str)->dict:
+    cur = mysql.connection.cursor()
+    cur.execute(f'''SELECT * FROM {table}''')
+    data:dict = cur.fetchall()
+    mysql.connection.commit()
+    cur.close()
+    return data
+
 def get_data(table:str, field:str, value:str)->dict:
     cur = mysql.connection.cursor() 
     cur.execute(f'''SELECT * FROM {table} WHERE `{field}` = "{value}" ''')
@@ -12,8 +20,15 @@ def get_data(table:str, field:str, value:str)->dict:
 
 def get_items(table:str, field:str, value:str)->dict:
     cur = mysql.connection.cursor() 
-    print(f'SELECT * FROM {table} WHERE `{field}` = "{value}" ')
     cur.execute(f'SELECT * FROM {table} WHERE `{field}` = "{value}" ')
+    data:dict = cur.fetchall()
+    mysql.connection.commit()
+    cur.close()
+    return data
+
+def get_items_in_order(table:str, field:str, value:str, order_field:str, order:str)->dict:
+    cur = mysql.connection.cursor() 
+    cur.execute(f'SELECT * FROM {table} WHERE `{field}` = "{value}" ORDER BY {order_field} {order}')
     data:dict = cur.fetchall()
     mysql.connection.commit()
     cur.close()
@@ -27,13 +42,6 @@ def check_existing_data(table:str, field:str, value:str)->bool:
     cur.close()
     return data['check_existing']
 
-def get_all_data(table:str)->dict:
-    cur = mysql.connection.cursor()
-    cur.execute(f'''SELECT * FROM {table}''')
-    data:dict = cur.fetchall()
-    mysql.connection.commit()
-    cur.close()
-    return data
 
 def count_data(table:str)->dict:
     cur = mysql.connection.cursor()
@@ -114,26 +122,32 @@ def get_specific_data(table:str, fields, values):
 def join_tables(userID:str):
     cur = mysql.connection.cursor() 
     cur.execute(f'''
-        SELECT L.LEASINGID, U.USERID, U.USER_FNAME, P.ADDRESS, M.MSG_CONTENT
+
+        SELECT L.LEASINGID, U.USERID, U.USER_FNAME, P.ADDRESS
         FROM USER U, PROPERTY P, LEASING L
-        JOIN (
-        SELECT leasingID, MAX(sent_at) AS latest_sent_at
-        FROM message
-        GROUP BY leasingID
-        ) latest_msg
-        ON l.leasingID = latest_msg.leasingID
-        JOIN message m
-        ON m.leasingID = l.leasingID AND m.sent_at = latest_msg.latest_sent_at
-        WHERE U.USERID = L.LESSORID
-        AND P.PROPERTYID = L.PROPERTYID
+        WHERE ((L.LESSORID = '{userID}' AND U.USERID = L.LESSEEID) || (L.LESSEEID = '{userID}' AND U.USERID = L.LESSORID))
+        AND L.PROPERTYID = P.PROPERTYID
+
     ''')
+
+
     data:dict = cur.fetchall()
     mysql.connection.commit()
     cur.close()
     return data
 
+# ORIGINAL QUERY
 
+#         SELECT L.LEASINGID, U.USERID, U.USER_FNAME, P.ADDRESS, M.MSG_CONTENT
+#         FROM USER U, PROPERTY P, LEASING L, MESSAGE M
+#         WHERE M.MSG_CONTENT = (
+#             SELECT M2.MSG_CONTENT FROM
+#             MESSAGE M2, LEASING L
+#             WHERE M2.LEASINGID = L.LEASINGID
+#             ORDER BY M2.SENT_AT DESC
+#             LIMIT 1
+#         )
+#         AND ((L.LESSORID = '{userID}' AND U.USERID = L.LESSEEID) || (L.LESSEEID = '{userID}' AND U.USERID = L.LESSORID))
+#         AND L.PROPERTYID = P.PROPERTYID
 
-
-
-
+        
