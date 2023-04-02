@@ -456,6 +456,14 @@ def contracts():
     leasing = db.get_all_data('leasing')
    
     user = db.get_all_data('user')
+    
+    for each in user:
+        each['images'] = []
+        for filename in os.listdir(f'static/users/{each["userID"]}/images/'):
+            if filename.endswith('.jpg') or filename.endswith('.jpeg') or filename.endswith('.png'):
+                # data['images'].append(str(filename))
+                    
+                each['images'].append(filename)
 
     # im = Image.open(property_images)
     return render_template("contracts.html", title=title, property=property, user=user,leasing=leasing)
