@@ -38,7 +38,7 @@
         <a href="#" class="list-group-item list-group-item-action py-2 ripple">
           <i class="fas fa-circle-exclamation fa-fw me-3"></i><span>Manage Complaints</span>
         </a>
-        <a href="#" class="list-group-item list-group-item-action py-2 ripple"><i
+        <a href="{{url_for('payment_reports')}}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-chart-line fa-fw me-3"></i><span>Payment Reports</span></a>
         <a href="{{url_for('admin_panel')}}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-user-shield fa-fw me-3"></i><span>Admin Panel</span></a>
@@ -136,16 +136,8 @@
                 {% if leasing.leasing_status == 'for review'%}
                 <td>
                   <div class="d-flex align-items-center">
+                    <h4>{{leasing.leasingID}}</h4>
                   
-                    
-                   <img
-                    src=""
-                    alt=""
-                    style="width: 150px; height: 150px; border-radius: 10px;"
-                    class="rounded-circle"
-                    />
-                   
-                
                     <div class="ms-3">
                       {% for user in user%}
                       {% if user.userID == leasing.lessorID%}  

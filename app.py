@@ -5,11 +5,17 @@ import db
 import restapi
 from flask_cors import CORS
 import os
-
+from datetime import datetime
 
 from flask_socketio import SocketIO, send, emit
 import requests
 import flask
+import mysql.connector
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+from flask import request
+import util
 
 
 
@@ -155,6 +161,15 @@ def view_user():
     error = request.args.get('error')
     success = request.args.get('success')
 
+
+    user['images'] = []
+    for filename in os.listdir(f'static/users/{user["userID"]}/images/'):
+        if filename.endswith('.jpg') or filename.endswith('.jpeg') or filename.endswith('.png'):
+            # data['images'].append(str(filename))
+                
+            user['images'].append(filename)
+                    
+                
     return render_template(
         "view_user.html",
         title=title,
@@ -281,6 +296,7 @@ def viewuseraccount():
     else:
         print('Account not found')
         return redirect(url_for('user_report'))
+
     
 @app.route("/viewadminaccount", methods=['GET'])
 def viewadminaccount():
@@ -453,6 +469,7 @@ def contracts():
         return redirect(url_for('dashboard'))
     
     title = "B-Lease | List of Contracts"  
+
     leasing = db.get_all_data('leasing')
    
     user = db.get_all_data('user')
@@ -463,24 +480,24 @@ def contracts():
 @app.route("/view_contract", methods=['GET'])
 def view_contract():
     
-     if 'sessionID' not in session:
+    if 'sessionID' not in session:
         return redirect(url_for('dashboard'))
-     propertyID = request.args.get('propertyID')
-     leasingID = request.args.get('leasingID')
-     userID = request.args.get('userID')
-     user = db.get_all_data('user')
-     title = "B-Lease | View Contracts" 
-     leasing = db.get_specific_data('leasing',['leasingID'],[leasingID])
+    leasingID = request.args.get('leasingID')
+    user = db.get_all_data('user')
+    title = "B-Lease | View Contracts" 
+    leasing = db.get_all_data('leasing')
+
+    leasing = db.get_specific_data('leasing',['leasingID'],[leasingID])
      
-     
-     leasing['documents'] = []
-     for filename in os.listdir(f'static/leasing/{leasing["leasingID"]}/documents/'):
+
+    leasing['documents'] = []
+    for filename in os.listdir(f'static/leasing/{leasing["leasingID"]}/documents/'):
         if filename.endswith('.pdf') or filename.endswith('.doc') or filename.endswith('.docx'):
             # data['images'].append(str(filename))
 
             leasing['documents'].append(filename)
 
-     return render_template("view_contract.html", title=title, leasing=leasing, user=user)
+    return render_template("view_contract.html", title=title, leasing=leasing, user=user)
 
 
 @app.route("/approveContract")
@@ -488,8 +505,43 @@ def approveContract():
 
     leasingID = request.args.get('leasingID')
     leasing_status = "pending"
+    leasing = db.get_all_data('leasing')
+    
+    # day = datetime.strptime('leasing_start', '%Y-%m-%d').strftime('%d')
 
-    db.update_data('leasing', ['leasingID', 'leasing_status'],[leasingID, leasing_status])
+    # print(str(day))
+    # define your leasing start and end dates
+    leasingID = request.args.get('leasingID')
+    leasing_payment_frequency = request.args.get('leasing_payment_frequency')
+    pay_lessorID = request.args.get('lessorID')
+    pay_lesseeID = request.args.get('lesseeID')
+    pay_fee = request.args.get('leasing_total_fee')
+
+    # define your leasing start and end dates
+    leasing_start_str = request.args.get('leasing_start')
+    leasing_end_str = request.args.get('leasing_end')
+    leasing_start = datetime.strptime(leasing_start_str, '%Y-%m-%d').date()
+    leasing_end = datetime.strptime(leasing_end_str, '%Y-%m-%d').date()
+
+    val = None
+    paymentID = util.generateUUID(str(datetime.now()))
+
+    fields = ['paymentID', 'leasingID','pay_status','pay_lessorID','pay_lesseeID','pay_date','pay_fee']
+    # loop over the range of dates and insert records
+    current_date = leasing_start
+    while current_date <= leasing_end:
+        # check if the current date occurs within the leasing period
+        if current_date < leasing_start or current_date >= leasing_end:
+            current_date += relativedelta(months=1)
+            continue
+        
+        val = (current_date).strftime("%Y-%m-%d")
+        data = [paymentID, leasingID, 'pending', pay_lessorID, pay_lesseeID, val, pay_fee]
+        db.insert_data('payment',fields,data)
+        db.update_data('leasing', ['leasingID', 'leasing_status'],[leasingID, leasing_status])
+        # increment the current date by one month
+        current_date += relativedelta(months=1)
+ 
     message = "You have successfully approve the contract."
     return redirect(url_for('contracts', success = message))
 
@@ -542,6 +594,35 @@ def finished_contracts():
     # im = Image.open(property_images)
     return render_template("finished_contracts.html", title=title, property=property, user=user,leasing=leasing)
 
+@app.route("/payment_reports")
+def payment_reports():
+    if 'sessionID' not in session:
+            return redirect(url_for('index'))
+    title = "B-Lease | Payment Reports"   
+
+    payment = db.get_all_data('payment')
+    user = db.get_all_data('user')
+
+    return render_template("payment_reports.html", title=title, payment=payment,user=user)
+
+@app.route("/deletepaymentaccount", methods=['GET'])
+def deletepaymentaccount():
+    
+    paymentID = request.args.get('paymentID')
+    
+    payment = db.get_specific_data('payment', ['paymentID'], [paymentID])
+    
+    if payment:
+        okey = db.delete_data('payment', 'paymentID', paymentID)
+        if okey:
+            print ('Payment Successfully Deleted')
+            return redirect(url_for('payment_reports'))
+        else:
+            print('Payment was not deleted')
+            return redirect(url_for('payment_reports'))
+    else:
+        print('Payment not found')
+        return redirect(url_for('payment_reports'))
 
 
 

@@ -39,7 +39,7 @@
         <a href="#" class="list-group-item list-group-item-action py-2 ripple">
           <i class="fas fa-circle-exclamation fa-fw me-3"></i><span>Manage Complaints</span>
         </a>
-        <a href="#" class="list-group-item list-group-item-action py-2 ripple"><i
+        <a href="{{url_for('payment_reports')}}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-chart-line fa-fw me-3"></i><span>Payment Reports</span></a>
         <a href="{{ url_for('admin_panel') }}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-user-shield fa-fw me-3"></i><span>Admin Panel</span></a>
@@ -165,8 +165,7 @@
                     <span class="badge badge-success rounded-pill d-inline">{{user.user_status}}</span>
                 </td>
                 <td>
-                  <a onclick="setViewModalUser('{{user.userID}}','{{user.user_fname}}', '{{user.user_mname}}','{{user.user_lname}}','{{user.user_birthdate}}','{{user.user_email}}' 
-                  ,'{{user.address}}','{{user.phone_number}}')" class="view-btn"  data-id="456">
+                  <a href="{{url_for('view_user',userID=user.userID)}}" class="view-btn"  data-id="456">
                     <i class="fa-solid fa-eye"></i>
                   </a>
                   &nbsp;
@@ -202,72 +201,7 @@
                 </div>
               </div>
               
-              <!-- view user modal -->
-              <div class="col-md-4">
-                <div class="modal" id="view-modal" tabindex="-1" role="dialog" aria-labelledby="modal-form" aria-hidden="true">
-                  <div class="modal-dialog modal-dialog-centered modal-form" role="document">
-                    <div class="modal-content">
-                      <div class="modal-body p-0">
-                        <div class="card card-plain">
-                          <div class="card-header">
-                            <h5 class="float-left" id="staticBackdropLabel">View User<span style="margin-right:315px;"></span><button type="button" class="view-cancel-btn btn-close align-self-right" data-mdb-dismiss="modal" aria-label="Close"></button></h5>
-                            
-                            <p class="mb-0"></p>
-                          </div>
-                          <div class="card-body">
-                            <form role="form text-left" method="POST" action="">
-                              
-                              <div class="d-flex px-2 py-1" style="align-self: center; color:#40A047;">
-                                
-                              <h5><span id="view_lastname"></span>, <span id="view_firstname"></span> <span id="view_middlename"></span></h5>
-                              <br/>
-                            
-                              
-                            </div>
-        
-                            <div>
-
-                            </div>
-                            
-                              <div class="flexer"></div>
-                              <div class="input-group input-group-static mb-4" style="color:#40A047;">
-                                <label class="label">ID Number</label>
-                                <input type="number" class="form-control"  name="userID" id="view_userID" readonly>
-                              </div>
-                             
-                              <!-- <div class="input-group input-group-static my-3" style="color:#40A047;">
-                                <label class="label">User Type</label>
-                                <input type="text" class="form-control" name="user_type" id="view_user_type" readonly>
-                              </div> -->
-
-                              <div class="input-group input-group-static my-3" style="color:#40A047;">
-                                <label class="label">Email</label>
-                                <input type="text" class="form-control" name="user_email" id="view_email" readonly>
-                              </div>
-              
-                              <div class="input-group input-group-static my-3"style="color:#40A047;">
-                                <label class="label">Birthdate</label>
-                                <input type="text" class="form-control" name="user_birthdate" id="view_birthdate" readonly>
-                              </div>
-
-                              <div class="input-group input-group-static my-3"style="color:#40A047;">
-                                <label class="label">Address</label>
-                                <input type="text" class="form-control" name="address" id="view_address" readonly>
-                              </div>
-              
-                              <div class="input-group input-group-static my-3"style="color:#40A047;">
-                                <label class="label">Contact Number</label>
-                                <input type="text" class="form-control" name="phone_number" id="view_phone_number" readonly>
-                              </div>
-                            </form>
-                          </div>
-                 
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
   </div>
 </main>
 <!--Main layout-->

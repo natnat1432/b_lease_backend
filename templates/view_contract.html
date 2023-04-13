@@ -42,7 +42,7 @@
         <a href="#" class="list-group-item list-group-item-action py-2 ripple">
           <i class="fas fa-circle-exclamation fa-fw me-3"></i><span>Manage Complaints</span>
         </a>
-        <a href="#" class="list-group-item list-group-item-action py-2 ripple"><i
+        <a href="{{url_for('payment_reports')}}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-chart-line fa-fw me-3"></i><span>Payment Reports</span></a>
         <a href="{{url_for('admin_panel')}}" class="list-group-item list-group-item-action py-2 ripple"><i
             class="fas fa-user-shield fa-fw me-3"></i><span>Admin Panel</span></a>
@@ -118,6 +118,7 @@
                     <a href="/leasingdocuments/{{leasing.leasingID}}/{{each}}" target="_blank">{{each}}</a>
                     {% endfor %}  
                     <br><br><br>
+                    
                   <!-- checklist -->
                   <!-- <div class="form-check">
                     <input class="form-check-input custom-checkbox" type="checkbox" value="" id="flexCheckChecked">
@@ -144,7 +145,8 @@
                
                     {% if leasing.leasing_status == 'for review' %}
                   <div class="approveOrDecline">
-                    <a href="{{url_for('approveContract',leasingID=leasing.leasingID)}}" style="border: 10px solid #14a44d; border-radius: 4px;" class="link-light bg-success">Approve</a>
+                    <a href="{{url_for('approveContract',leasingID=leasing.leasingID,leasing_start=leasing.leasing_start,leasing_end=leasing.leasing_end,leasing_payment_frequency=leasing.leasing_payment_frequency
+                    ,lessorID=leasing.lessorID,lesseeID=leasing.lesseeID,leasing_total_fee=leasing.leasing_total_fee)}}" style="border: 10px solid #14a44d; border-radius: 4px;" class="link-light bg-success">Approve</a>
                     &nbsp; 
                     <a href="{{url_for('declineContract',leasingID=leasing.leasingID)}}" style="border: 10px solid #dc4c64; border-radius: 4px;"class="link-light bg-danger">Decline</a>  
                   </div>
